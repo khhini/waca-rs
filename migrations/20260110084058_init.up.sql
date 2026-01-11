@@ -1,0 +1,22 @@
+-- Add up migration script here
+-- sqlfluff:dialect:sqlite
+CREATE TABLE IF NOT EXISTS bookmarks (
+    id INTEGER PRIMARY KEY,
+    url TEXT UNIQUE NOT NULL,
+    description TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS tags (
+    id INTEGER PRIMARY KEY,
+    name TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS bookmark_tags (
+    bookmark_id INTEGER,
+    tag_id INTEGER,
+    PRIMARY KEY (bookmark_id, tag_id),
+    FOREIGN KEY (bookmark_id) REFERENCES bookmarks (id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags (id) ON DELETE CASCADE
+);
+
