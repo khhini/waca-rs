@@ -24,7 +24,7 @@ async fn main() -> anyhow::Result<()> {
     match args.cmd {
         Some(Command::Add { url, description }) => {
             println!("Adding new bookmarks");
-            let id = sqlite_repo.add(url, description).await?;
+            let id = sqlite_repo.add(&url, &description).await?;
             println!("Added new bookmark id {id}");
         }
         Some(Command::List) => {
@@ -67,7 +67,7 @@ ORDER BY id
 
         Ok(recs)
     }
-    async fn add(self, url: String, description: String) -> anyhow::Result<i64> {
+    async fn add(self, url: &str, description: &str) -> anyhow::Result<i64> {
         let mut conn = self.pool.acquire().await?;
 
         let id = sqlx::query!(
