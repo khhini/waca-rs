@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand};
 use std::env;
+use waca_rs::bookmark::BookmarkSqliteRepo;
 
 use sqlx::SqlitePool;
 
@@ -35,53 +36,4 @@ async fn main() -> anyhow::Result<()> {
     }
 
     Ok(())
-}
-
-#[derive(Debug)]
-struct Bookmark {
-    id: i64,
-    url: String,
-    description: String,
-}
-
-struct BookmarkSqliteRepo {
-    pool: SqlitePool,
-}
-
-impl BookmarkSqliteRepo {
-    fn new(pool: SqlitePool) -> Self {
-        BookmarkSqliteRepo { pool }
-    }
-
-    async fn list(self) -> anyhow::Result<Vec<Bookmark>> {
-        let recs = sqlx::query_as!(
-            Bookmark,
-            r#"
-SELECT id,  url,description
-FROM bookmarks
-ORDER BY id
-        "#
-        )
-        .fetch_all(&self.pool)
-        .await?;
-
-        Ok(recs)
-    }
-    async fn add(self, url: &str, description: &str) -> anyhow::Result<i64> {
-        let mut conn = self.pool.acquire().await?;
-
-        let id = sqlx::query!(
-            r#"
-INSERT INTO bookmarks ( url, description)
-VALUES ( ?1, ?2 )
-        "#,
-            url,
-            description
-        )
-        .execute(&mut *conn)
-        .await?
-        .last_insert_rowid();
-
-        Ok(id)
-    }
 }
